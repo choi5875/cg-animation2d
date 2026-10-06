@@ -30,7 +30,22 @@ class Renderer {
             ],
             slide1: [],
             slide2: [],
-            slide3: []
+            slide3: [
+                {
+                    vertices: [
+                        CG.Vector3(300, 200, 1),
+                        CG.Vector3(300, 400, 1),
+                        CG.Vector3(500, 400, 1),
+                        CG.Vector3(500, 200, 1)
+                    ],
+                    transform: [
+                        CG.Vector3(300, 200, 1),
+                        CG.Vector3(300, 400, 1),
+                        CG.Vector3(500, 400, 1),
+                        CG.Vector3(500, 200, 1)
+                    ],
+                }
+            ]
         };
     }
 
@@ -85,7 +100,7 @@ class Renderer {
 
     //
     updateTransforms(time, delta_time) {
-        // TODO: update any transformations needed for animation
+        
     }
     
     //
@@ -138,6 +153,8 @@ class Renderer {
 
     //
     drawSlide3() {
+        let red = [255, 0, 0, 255];
+        this.drawConvexPolygon(this.models.slide3[0].transform, red);
         // TODO: get creative!
         //   - animation should involve all three basic transformation types
         //     (translation, scaling, and rotation)
