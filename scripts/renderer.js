@@ -1,4 +1,6 @@
 import * as CG from './transforms.js';
+import { Matrix } from "./matrix.js";
+
 
 class Renderer {
     // canvas:              object ({id: __, width: __, height: __})
@@ -38,12 +40,7 @@ class Renderer {
                         CG.Vector3(500, 400, 1),
                         CG.Vector3(500, 200, 1)
                     ],
-                    transform: [
-                        CG.Vector3(300, 200, 1),
-                        CG.Vector3(300, 400, 1),
-                        CG.Vector3(500, 400, 1),
-                        CG.Vector3(500, 200, 1)
-                    ],
+                    transform: null
                 }
             ]
         };
@@ -99,8 +96,16 @@ class Renderer {
     }
 
     //
-    updateTransforms(time, delta_time) {
-        
+    updateTransforms(time, delta_time) {  
+        if (this.models.slide3[0].transform == null) {
+            this.models.slide3[0].transform = this.models.slide3[0].vertices;
+        }
+        let mat = new Matrix(3, 3);
+        CG.mat3x3Translate(mat, 3, 0);
+        this.models.slide3[0].transform[0] = Matrix.multiply([mat, this.models.slide3[0].transform[0]]);
+        this.models.slide3[0].transform[1] = Matrix.multiply([mat, this.models.slide3[0].transform[1]]);
+        this.models.slide3[0].transform[2] = Matrix.multiply([mat, this.models.slide3[0].transform[2]]);
+        this.models.slide3[0].transform[3] = Matrix.multiply([mat, this.models.slide3[0].transform[3]]);
     }
     
     //
