@@ -40,7 +40,19 @@ class Renderer {
                         CG.Vector3(500, 400, 1),
                         CG.Vector3(500, 200, 1)
                     ],
-                    transform: null
+                    transform: null,
+                    tx: 0,
+                    tx_velocity: 10,
+                    ty: 0,
+                    ty_velocity: 0,
+                    sx: 2,
+                    sx_velocity: 0.1,
+                    sx_direction: 1,
+                    sy: 2,
+                    sy_velocity: 0.1,
+                    sy_direction: 1,
+                    theta: 0,
+                    theta_velocity: Math.PI / 16
                 }
             ]
         };
@@ -96,16 +108,67 @@ class Renderer {
     }
 
     //
-    updateTransforms(time, delta_time) {  
+    updateTransforms(time, delta_time) {
+
         if (this.models.slide3[0].transform == null) {
-            this.models.slide3[0].transform = this.models.slide3[0].vertices;
+            this.models.slide3[0].transform = [
+                this.models.slide3[0].vertices[0],
+                this.models.slide3[0].vertices[1],
+                this.models.slide3[0].vertices[2],
+                this.models.slide3[0].vertices[3],
+            ];
         }
-        let mat = new Matrix(3, 3);
-        CG.mat3x3Translate(mat, 3, 0);
-        this.models.slide3[0].transform[0] = Matrix.multiply([mat, this.models.slide3[0].transform[0]]);
-        this.models.slide3[0].transform[1] = Matrix.multiply([mat, this.models.slide3[0].transform[1]]);
-        this.models.slide3[0].transform[2] = Matrix.multiply([mat, this.models.slide3[0].transform[2]]);
-        this.models.slide3[0].transform[3] = Matrix.multiply([mat, this.models.slide3[0].transform[3]]);
+
+        let center_x = (this.models.slide3[0].vertices[0].values[0][0] + this.models.slide3[0].vertices[2].values[0][0]) / 2.0;
+        let center_y = (this.models.slide3[0].vertices[0].values[1][0] + this.models.slide3[0].vertices[2].values[1][0]) / 2.0;
+
+        let to_origin = new Matrix(3, 3);
+        CG.mat3x3Translate(to_origin, -1 * center_x, -1 * center_y);
+
+        let to_center = new Matrix(3, 3);
+        CG.mat3x3Translate(to_center, center_x, center_y);
+
+        this.models.slide3[0].tx += this.models.slide3[0].tx_velocity * delta_time / 100;
+        if (this.models.slide3[0].tx >= center_x) {
+            this.models.slide3[0].tx_velocity *= -1;
+        }
+        if (this.models.slide3[0].tx <= -1 * center_x) {
+            this.models.slide3[0].tx_velocity *= -1;
+        }
+
+        let translate = new Matrix(3, 3);
+        CG.mat3x3Translate(translate, this.models.slide3[0].tx, this.models.slide3[0].ty);
+
+        this.models.slide3[0].sx += this.models.slide3[0].sx_direction * this.models.slide3[0].sx_velocity * delta_time / 100;
+        if (this.models.slide3[0].sx > 1.5) {
+            this.models.slide3[0].sx_direction = -1;
+        }
+        if (this.models.slide3[0].sx < 0.5) {
+            this.models.slide3[0].sx_direction = 1;
+        }
+
+        this.models.slide3[0].sy += this.models.slide3[0].sy_direction * this.models.slide3[0].sy_velocity * delta_time / 100;
+        if (this.models.slide3[0].sy > 1.5) {
+            this.models.slide3[0].sy_direction = -1;
+        }
+        if (this.models.slide3[0].sy < 0.5) {
+            this.models.slide3[0].sy_direction = 1;
+        }
+        
+        let scale = new Matrix(3, 3);
+        CG.mat3x3Scale(scale, this.models.slide3[0].sx, this.models.slide3[0].sy);
+
+        this.models.slide3[0].theta = (this.models.slide3[0].theta + this.models.slide3[0].theta_velocity * delta_time / 100) % (2 * Math.PI);
+
+        let rotate = new Matrix(3, 3);
+        CG.mat3x3Rotate(rotate, this.models.slide3[0].theta);
+
+        this.models.slide3[0].transform = [
+            Matrix.multiply([translate, to_center, rotate, scale, to_origin, this.models.slide3[0].vertices[0]]),
+            Matrix.multiply([translate, to_center, rotate, scale, to_origin, this.models.slide3[0].vertices[1]]),
+            Matrix.multiply([translate, to_center, rotate, scale, to_origin, this.models.slide3[0].vertices[2]]),
+            Matrix.multiply([translate, to_center, rotate, scale, to_origin, this.models.slide3[0].vertices[3]])
+        ];
     }
     
     //
@@ -159,12 +222,17 @@ class Renderer {
     //
     drawSlide3() {
         let red = [255, 0, 0, 255];
+        let orange = [255, 125, 0, 255];
+        let yellow = [255, 255, 0, 255];
+        let green = [0, 255, 0, 255];
+        let blue = [0, 0, 255, 255];
+        let purple = [255, 0, 255, 255];
         this.drawConvexPolygon(this.models.slide3[0].transform, red);
-        // TODO: get creative!
-        //   - animation should involve all three basic transformation types
-        //     (translation, scaling, and rotation)
-        
-        
+        this.drawConvexPolygon(this.models.slide3[0].transform, orange);
+        this.drawConvexPolygon(this.models.slide3[0].transform, yellow);
+        this.drawConvexPolygon(this.models.slide3[0].transform, green);
+        this.drawConvexPolygon(this.models.slide3[0].transform, blue);
+        this.drawConvexPolygon(this.models.slide3[0].transform, purple);
     }
     
     // vertex_list:  array of object [Matrix(3, 1), Matrix(3, 1), ..., Matrix(3, 1)]
